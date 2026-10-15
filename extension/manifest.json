@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "PWA Badge Bridge",
+  "version": "1.0.0",
+  "description": "Shows unread counts from installed web apps (e.g. Messenger) as KDE taskbar badges.",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzH5zxZwuAKajYnwpwDb1I4PizEwoCkNWMAGgNJhs56u9tA3pi/QgXuchi4fPJO0x1dN/giBIFRgga7LhmhV2d+e2yqiG8oUtD0q9mokOPVR0BMzEJNXXW5iPJ8pB6mT8CFy/Ys6tZt3H4IhTPIhu/FL00ohsb5Tl8kZy0nwLhoZbxPZUNmf+7xhcsl6KPpy7gcyRsKYhwRSgXBGdA4y1cLpdkxAZ1otjNlFFGbuDSux1rImFVznpSG8CjCY7FHJtDkFdAG+GcavHcIfJ2eclq8uP4Qc90JXo4psJftB0yyL4SppjjguUN5Zllwo0L6H+GwdUp0Oa6V4EzhaJWf4JwIDAQAB",
+  "permissions": ["tabs", "nativeMessaging"],
+  "background": { "service_worker": "background.js" }
+}
