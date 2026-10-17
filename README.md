@@ -38,7 +38,7 @@ Which apps should get a badge? Numbers separated by spaces (Enter to skip): 1
   Added Messenger (messenger.com).
 ```
 
-It asks for each app's website because the app's launcher file doesn't record it. You can type the domain or paste any URL from the site. The choices are saved to `~/.config/pwa-badge-bridge/config.json`.
+It asks for each app's website because the app's launcher file doesn't record it. You can type the domain or paste any URL from the site. If the URL has a path, it asks whether to count only pages under it; say yes for apps that live in a folder of a larger site, like `https://example.com/tools/kanban/`. The choices are saved to `~/.config/pwa-badge-bridge/config.json`.
 
 Then open your browser's extensions page (`chrome://extensions`), turn on **Developer mode**, click **Load unpacked**, and select the `extension` folder.
 
@@ -63,6 +63,7 @@ To add more apps later, run `~/.local/bin/pwa-badge-bridge --setup` and reload t
 ```
 
 - **host**: the site's domain. Subdomains match too, so `messenger.com` covers `www.messenger.com`.
+- **path** (optional): only count pages under this folder, e.g. `"/tools/kanban"` matches `/tools/kanban/` and `/tools/kanban/board`, but not `/tools/kanban2`. Use it for apps that live in a folder of a larger site. If several entries match a page, the one with the longest path wins.
 - **desktop**: the app's `.desktop` file name, from `pwa-badge-bridge --list`.
 - **regex** (optional): finds the count in the title. The first capture group must be the number. The default, `^\((\d+)\)`, matches titles that start with `(3)`. For a count elsewhere in the title, drop the `^`, e.g. `\((\d+)\)`.
 

@@ -112,18 +112,22 @@ HOST_RE = re.compile(r"^[a-z0-9-]+(\.[a-z0-9-]+)+$")
 
 
 def clean_host(text):
-    """Turn 'https://www.messenger.com/t/1' or 'messenger.com' into 'messenger.com'.
-    Returns '' if the text doesn't look like a website."""
-    text = text.strip().lower()
+    """Turn 'https://www.example.com/tools/app/' into ('example.com', '/tools/app')
+    and 'messenger.com' into ('messenger.com', ''). The path keeps its case.
+    Returns ('', '') if the text doesn't look like a website."""
+    text = text.strip()
     if "://" not in text:
         text = "https://" + text
     try:
-        host = urlparse(text).hostname or ""
+        url = urlparse(text)
+        host = url.hostname or ""
     except ValueError:
-        return ""
+        return "", ""
     if host.startswith("www."):
         host = host[4:]
-    return host if HOST_RE.match(host) or host == "localhost" else ""
+    if not (HOST_RE.match(host) or host == "localhost"):
+        return "", ""
+    return host, url.path.rstrip("/")
 
 
 def setup(ask=input):
@@ -173,13 +177,20 @@ def _setup(ask):
             if desktop in configured:
                 print(f"  {name} is already configured.")
                 continue
-            host = clean_host(ask(f"  Website of {name} (e.g. messenger.com): "))
+            host, path = clean_host(ask(f"  Website of {name} (e.g. messenger.com): "))
             while not host:
-                host = clean_host(ask("  That doesn't look like a website. Try again (e.g. messenger.com): "))
-            sites.append({"host": host, "desktop": desktop, "regex": DEFAULT_REGEX})
+                host, path = clean_host(ask("  That doesn't look like a website. Try again (e.g. messenger.com): "))
+            # A pasted URL may just be some page of the site; only keep the path if asked.
+            if path and not ask(f"  Count only pages under {path}? Say yes if the app lives "
+                                f"in that folder (y/N): ").strip().lower().startswith("y"):
+                path = ""
+            site = {"host": host, "desktop": desktop, "regex": DEFAULT_REGEX}
+            if path:
+                site["path"] = path
+            sites.append(site)
             configured.add(desktop)
             added += 1
-            print(f"  Added {name} ({host}).")
+            print(f"  Added {name} ({host}{path}).")
         if added:
             print()
             print("Note: the badge reads the count from the app's window title. The default")

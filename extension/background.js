@@ -27,9 +27,9 @@ function connect() {
       sites = [];
       for (const s of msg.sites) {
         try {
-          sites.push({ ...s, regex: new RegExp(s.regex || "^\\((\\d+)\\)") });
+          sites.push({ ...s, path: normalizePath(s.path), regex: new RegExp(s.regex || "^\\((\\d+)\\)") });
         } catch (e) {
-          console.warn(`Skipping ${s.host}: invalid regex`, e);
+          console.warn(`Skipping ${s.host}: invalid regex or path`, e);
         }
       }
       scanAllTabs();
@@ -43,13 +43,29 @@ function connect() {
   port.postMessage({ type: "hello" });
 }
 
+// Encode the configured path the way the browser reports URL paths (e.g. "á" -> "%C3%A1"),
+// with a leading slash and no trailing one; "" means the whole site.
+function normalizePath(path) {
+  if (!path) return "";
+  return new URL("https://x/" + String(path).replace(/^\/+/, "")).pathname.replace(/\/+$/, "");
+}
+
 function siteFor(url) {
+  let u;
   try {
-    const h = new URL(url).hostname;
-    return sites.find((s) => h === s.host || h.endsWith("." + s.host));
+    u = new URL(url);
   } catch {
     return null;
   }
+  const h = u.hostname;
+  let best = null;
+  for (const s of sites) {
+    if (h !== s.host && !h.endsWith("." + s.host)) continue;
+    if (s.path && u.pathname !== s.path && !u.pathname.startsWith(s.path + "/")) continue;
+    // Prefer the most specific path, so an app in a subfolder wins over a site-wide entry.
+    if (!best || s.path.length > best.path.length) best = s;
+  }
+  return best;
 }
 
 function publish(desktop) {
